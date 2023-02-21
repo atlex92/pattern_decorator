@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "unit.h"
 #include "orc.h"
 #include "elf.h"
@@ -19,11 +20,11 @@ IUnit* makeFight(IUnit* const first, IUnit* const second);
 int main() {
 
     srand(time(nullptr));
-	IUnit* orc{ new Orc };
-	IUnit* elf{ new Elf };
+	std::unique_ptr<IUnit> orc{ new Orc };
+	std::unique_ptr<IUnit> elf{ new Elf };
 
-	IUnit* first_round_looser = makeFight(orc, elf);
-	IUnit* first_round_winner = (first_round_looser == elf) ? orc : elf;
+	IUnit* first_round_looser = makeFight(orc.get(), elf.get());
+	IUnit* first_round_winner = (first_round_looser == elf.get()) ? orc.get() : elf.get();
 
 	system("pause");
 	system("cls");
@@ -33,16 +34,16 @@ int main() {
 	system("pause");
 	system("cls");
 
-	IUnit* unit_with_life_stealing{ new LifeStealerAtackDecorator{first_round_looser} };
+	std::unique_ptr<IUnit> unit_with_life_stealing{ new LifeStealerAtackDecorator{first_round_looser} };
 
-	IUnit* second_round_looser = makeFight(unit_with_life_stealing, first_round_winner);
-	IUnit* second_round_winner = (second_round_looser == unit_with_life_stealing) ? first_round_winner : unit_with_life_stealing;
+	IUnit* second_round_looser = makeFight(unit_with_life_stealing.get(), first_round_winner);
+	IUnit* second_round_winner = (second_round_looser == unit_with_life_stealing.get()) ? first_round_winner : unit_with_life_stealing.get();
 
 	printf("now %s will get critical strike effect!\r\n\r\n", second_round_looser->Name());
 
-	IUnit* unitWithCriticalStrike{ new AssasinAtackDecorator{second_round_looser} };
+	std::unique_ptr<IUnit> unit_with_critical_strike{ new AssasinAtackDecorator{second_round_looser} };
 
-	makeFight(unitWithCriticalStrike, second_round_winner);
+	makeFight(unit_with_critical_strike.get(), second_round_winner);
     return 0;
 }
 
